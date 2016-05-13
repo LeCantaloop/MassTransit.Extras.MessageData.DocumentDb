@@ -13,6 +13,8 @@ namespace MassTransit.Extras.MessageData.DocumentDb
     {
         public Stream Serialize(Document document)
         {
+            if (document == null) { throw new ArgumentNullException(nameof(document)); }
+
             var stream = new MemoryStream();
             document.SaveTo(stream);
             stream.Position = 0;

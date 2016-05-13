@@ -27,6 +27,11 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         /// <param name="serializer"></param>
         public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId, IDocumentSerializer serializer)
         {
+            if (clientFactory == null) { throw new ArgumentNullException(nameof(clientFactory)); }
+            if (string.IsNullOrWhiteSpace(databaseId)) { throw new ArgumentNullException(nameof(databaseId)); }
+            if (string.IsNullOrWhiteSpace(collectionId)) { throw new ArgumentNullException(nameof(collectionId)); }
+            if (serializer == null) { throw new ArgumentNullException(nameof(serializer)); }
+
             _clientFactory = clientFactory;
             _databaseId = databaseId;
             _collectionId = collectionId;
