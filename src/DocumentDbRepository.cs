@@ -56,12 +56,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
 
             using (var client = _clientFactory.Invoke())
             {
-                var options = new RequestOptions();
-                if (timeToLive.HasValue)
-                {
-                    options.ResourceTokenExpirySeconds = Convert.ToInt32(timeToLive.Value.TotalSeconds);
-                }
-
+                var options = new RequestOptionsBuilder().Build(timeToLive);
                 var uri = UriFactory.CreateDocumentUri(_databaseId, _collectionId, Guid.NewGuid().ToString());
 
                 var result =
