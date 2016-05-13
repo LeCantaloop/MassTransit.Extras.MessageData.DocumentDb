@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using MassTransit.MessageData;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using Newtonsoft.Json;
 
 namespace MassTransit.Extras.MessageData.DocumentDb
 {
@@ -14,6 +13,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         private readonly Func<DocumentClient> _clientFactory;
         private readonly string _databaseId;
         private readonly string _collectionId;
+        private readonly IDocumentSerializer _serializer;
 
         /// <summary>
         /// Create a new instance of the DocumentDbRepository
@@ -23,11 +23,13 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         /// </param>
         /// <param name="databaseId"></param>
         /// <param name="collectionId"></param>
-        public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId)
+        /// <param name="serializer"></param>
+        public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId, IDocumentSerializer serializer)
         {
             _clientFactory = clientFactory;
             _databaseId = databaseId;
             _collectionId = collectionId;
+            _serializer = serializer;
         }
 
         public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = new CancellationToken())
@@ -37,14 +39,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
             using (var client = _clientFactory.Invoke())
             {
                 var result = await client.ReadDocumentAsync(address).ConfigureAwait(false);
-
-                var stream = new MemoryStream();
-                var writer = new JsonTextWriter(new StreamWriter(stream));
-                JsonSerializer.Create().Serialize(writer, result.Resource);
-                writer.Flush();
-
-                stream.Position = 0;
-                return stream;
+                return _serializer.Serialize(result.Resource);
             }
         }
 
