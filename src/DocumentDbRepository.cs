@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using MassTransit.Internals.Extensions;
 using MassTransit.MessageData;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
@@ -38,7 +39,8 @@ namespace MassTransit.Extras.MessageData.DocumentDb
 
             using (var client = _clientFactory.Invoke())
             {
-                var result = await client.ReadDocumentAsync(address).ConfigureAwait(false);
+                var result =
+                    await client.ReadDocumentAsync(address).WithCancellation(cancellationToken).ConfigureAwait(false);
                 return _serializer.Serialize(result.Resource);
             }
         }
@@ -57,7 +59,11 @@ namespace MassTransit.Extras.MessageData.DocumentDb
 
                 var uri = UriFactory.CreateDocumentUri(_databaseId, _collectionId, Guid.NewGuid().ToString());
 
-                var result = await client.CreateDocumentAsync(uri, JsonSerializable.LoadFrom<Document>(stream), options).ConfigureAwait(false);
+                var result =
+                    await
+                        client.CreateDocumentAsync(uri, JsonSerializable.LoadFrom<Document>(stream), options)
+                            .WithCancellation(cancellationToken)
+                            .ConfigureAwait(false);
                 return new Uri(result.Resource.SelfLink);
             }
         }
