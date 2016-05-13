@@ -15,6 +15,15 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         private readonly string _databaseId;
         private readonly string _collectionId;
         private readonly IDocumentSerializer _serializer;
+        private readonly Func<TimeSpan?, RequestOptions> _requestOptionsBuilder;
+
+
+        public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId)
+            : this(
+                clientFactory, databaseId, collectionId, new DocumentSerializer(),
+                timeToLive => new RequestOptionsBuilder().Build(timeToLive))
+        {
+        }
 
         /// <summary>
         /// Create a new instance of the DocumentDbRepository
@@ -25,17 +34,21 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         /// <param name="databaseId"></param>
         /// <param name="collectionId"></param>
         /// <param name="serializer"></param>
-        public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId, IDocumentSerializer serializer)
+        /// <param name="requestOptionsBuilder"></param>
+        public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId,
+            IDocumentSerializer serializer, Func<TimeSpan?, RequestOptions> requestOptionsBuilder)
         {
             if (clientFactory == null) { throw new ArgumentNullException(nameof(clientFactory)); }
             if (string.IsNullOrWhiteSpace(databaseId)) { throw new ArgumentNullException(nameof(databaseId)); }
             if (string.IsNullOrWhiteSpace(collectionId)) { throw new ArgumentNullException(nameof(collectionId)); }
             if (serializer == null) { throw new ArgumentNullException(nameof(serializer)); }
+            if (requestOptionsBuilder == null) { throw new ArgumentNullException(nameof(requestOptionsBuilder)); }
 
             _clientFactory = clientFactory;
             _databaseId = databaseId;
             _collectionId = collectionId;
             _serializer = serializer;
+            _requestOptionsBuilder = requestOptionsBuilder;
         }
 
         public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = new CancellationToken())
@@ -56,7 +69,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
 
             using (var client = _clientFactory.Invoke())
             {
-                var options = new RequestOptionsBuilder().Build(timeToLive);
+                var options = _requestOptionsBuilder.Invoke(timeToLive);
                 var uri = UriFactory.CreateDocumentUri(_databaseId, _collectionId, Guid.NewGuid().ToString());
 
                 var result =
