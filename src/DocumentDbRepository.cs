@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MassTransit.Internals.Extensions;
 using MassTransit.MessageData;
-using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 
 namespace MassTransit.Extras.MessageData.DocumentDb
@@ -14,14 +13,13 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         private readonly Func<DocumentClient> _clientFactory;
         private readonly string _databaseId;
         private readonly string _collectionId;
-        private readonly IDocumentSerializer _serializer;
         private readonly Func<TimeSpan?, RequestOptions> _requestOptionsBuilder;
 
         private static readonly UriBuilder UriBuilder = new UriBuilder();
 
         public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId)
             : this(
-                clientFactory, databaseId, collectionId, new DocumentSerializer(),
+                clientFactory, databaseId, collectionId,
                 timeToLive => new RequestOptionsBuilder().Build(timeToLive))
         {
         }
@@ -34,21 +32,17 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         /// </param>
         /// <param name="databaseId"></param>
         /// <param name="collectionId"></param>
-        /// <param name="serializer"></param>
         /// <param name="requestOptionsBuilder"></param>
-        public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId,
-            IDocumentSerializer serializer, Func<TimeSpan?, RequestOptions> requestOptionsBuilder)
+        public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId, Func<TimeSpan?, RequestOptions> requestOptionsBuilder)
         {
             if (clientFactory == null) { throw new ArgumentNullException(nameof(clientFactory)); }
             if (string.IsNullOrWhiteSpace(databaseId)) { throw new ArgumentNullException(nameof(databaseId)); }
             if (string.IsNullOrWhiteSpace(collectionId)) { throw new ArgumentNullException(nameof(collectionId)); }
-            if (serializer == null) { throw new ArgumentNullException(nameof(serializer)); }
             if (requestOptionsBuilder == null) { throw new ArgumentNullException(nameof(requestOptionsBuilder)); }
 
             _clientFactory = clientFactory;
             _databaseId = databaseId;
             _collectionId = collectionId;
-            _serializer = serializer;
             _requestOptionsBuilder = requestOptionsBuilder;
         }
 
@@ -60,7 +54,9 @@ namespace MassTransit.Extras.MessageData.DocumentDb
             {
                 var result =
                     await client.ReadDocumentAsync(address).WithCancellation(cancellationToken).ConfigureAwait(false);
-                return _serializer.Serialize(result.Resource);
+
+                var wrapper = (MessageWrapper) (dynamic) result.Resource;
+                return new MemoryStream(wrapper.Data);
             }
         }
 
@@ -73,9 +69,16 @@ namespace MassTransit.Extras.MessageData.DocumentDb
                 var options = _requestOptionsBuilder.Invoke(timeToLive);
                 var uri = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
 
+                var obj = new MessageWrapper();
+                using (var s = new MemoryStream())
+                {
+                    stream.CopyTo(s);
+                    obj.Data = s.ToArray();
+                }
+
                 var result =
                     await
-                        client.CreateDocumentAsync(uri, JsonSerializable.LoadFrom<Document>(stream), options)
+                        client.CreateDocumentAsync(uri, obj, options)
                             .WithCancellation(cancellationToken)
                             .ConfigureAwait(false);
 
