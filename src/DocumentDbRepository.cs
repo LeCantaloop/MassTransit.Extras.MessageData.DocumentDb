@@ -71,7 +71,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
             using (var client = _clientFactory.Invoke())
             {
                 var options = _requestOptionsBuilder.Invoke(timeToLive);
-                var uri = UriFactory.CreateDocumentUri(_databaseId, _collectionId, Guid.NewGuid().ToString());
+                var uri = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
 
                 var result =
                     await
