@@ -17,6 +17,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         private readonly IDocumentSerializer _serializer;
         private readonly Func<TimeSpan?, RequestOptions> _requestOptionsBuilder;
 
+        private static readonly UriBuilder UriBuilder = new UriBuilder();
 
         public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId)
             : this(
@@ -77,7 +78,8 @@ namespace MassTransit.Extras.MessageData.DocumentDb
                         client.CreateDocumentAsync(uri, JsonSerializable.LoadFrom<Document>(stream), options)
                             .WithCancellation(cancellationToken)
                             .ConfigureAwait(false);
-                return new Uri(result.Resource.SelfLink);
+
+                return UriBuilder.Build(result.Resource);
             }
         }
     }

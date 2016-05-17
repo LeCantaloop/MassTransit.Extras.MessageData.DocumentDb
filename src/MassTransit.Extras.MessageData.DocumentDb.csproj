@@ -64,6 +64,7 @@
     <Compile Include="DocumentSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequestOptionsBuilder.cs" />
+    <Compile Include="UriBuilder.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
