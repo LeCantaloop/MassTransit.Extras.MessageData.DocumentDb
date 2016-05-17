@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Text;
 using Machine.Specifications;
 using Microsoft.Azure.Documents;
@@ -11,10 +10,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb.Tests
     {
         Establish context = () =>
         {
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes("{\"Data\": \"" + EncodedData + "\"}")))
-            {
-                Document = JsonSerializable.LoadFrom<Document>(stream);
-            }
+            Document = ("{\"Data\": \"" + EncodedData + "\"}").ToDocument();
             Subject = new DocumentMapper();
         };
 
