@@ -16,6 +16,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         private readonly Func<TimeSpan?, RequestOptions> _requestOptionsBuilder;
 
         private static readonly UriBuilder UriBuilder = new UriBuilder();
+        private static readonly DocumentMapper Mapper = new DocumentMapper();
 
         public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId)
             : this(
@@ -55,7 +56,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
                 var result =
                     await client.ReadDocumentAsync(address).WithCancellation(cancellationToken).ConfigureAwait(false);
 
-                var wrapper = (MessageWrapper) (dynamic) result.Resource;
+                var wrapper = Mapper.Map<MessageWrapper>(result.Resource);
                 return new MemoryStream(wrapper.Data);
             }
         }
