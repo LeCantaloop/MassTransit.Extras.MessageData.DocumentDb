@@ -16,7 +16,8 @@ namespace MassTransit.Extras.MessageData.DocumentDb
         private readonly Func<TimeSpan?, RequestOptions> _requestOptionsBuilder;
 
         private static readonly UriBuilder UriBuilder = new UriBuilder();
-        private static readonly DocumentMapper Mapper = new DocumentMapper();
+        private static readonly DocumentMapper DocMapper = new DocumentMapper();
+        private static readonly StreamMapper StreamMapper = new StreamMapper();
 
         public DocumentDbRepository(Func<DocumentClient> clientFactory, string databaseId, string collectionId)
             : this(
@@ -56,7 +57,7 @@ namespace MassTransit.Extras.MessageData.DocumentDb
                 var result =
                     await client.ReadDocumentAsync(address).WithCancellation(cancellationToken).ConfigureAwait(false);
 
-                var wrapper = Mapper.Map<MessageWrapper>(result.Resource);
+                var wrapper = DocMapper.Map<MessageWrapper>(result.Resource);
                 return new MemoryStream(wrapper.Data);
             }
         }
@@ -69,19 +70,10 @@ namespace MassTransit.Extras.MessageData.DocumentDb
             {
                 var options = _requestOptionsBuilder.Invoke(timeToLive);
                 var uri = UriFactory.CreateDocumentCollectionUri(_databaseId, _collectionId);
+                var wrapper = StreamMapper.Map(stream);
 
-                var obj = new MessageWrapper();
-                using (var s = new MemoryStream())
-                {
-                    stream.CopyTo(s);
-                    obj.Data = s.ToArray();
-                }
-
-                var result =
-                    await
-                        client.CreateDocumentAsync(uri, obj, options)
-                            .WithCancellation(cancellationToken)
-                            .ConfigureAwait(false);
+                var result = await
+                        client.CreateDocumentAsync(uri, wrapper, options).WithCancellation(cancellationToken).ConfigureAwait(false);
 
                 return UriBuilder.Build(result.Resource);
             }
