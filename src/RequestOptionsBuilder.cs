@@ -3,7 +3,7 @@ using Microsoft.Azure.Documents.Client;
 
 namespace MassTransit.Extras.MessageData.DocumentDb
 {
-    internal class RequestOptionsBuilder
+    public class RequestOptionsBuilder
     {
         public RequestOptions Build(TimeSpan? timeToLive)
         {
