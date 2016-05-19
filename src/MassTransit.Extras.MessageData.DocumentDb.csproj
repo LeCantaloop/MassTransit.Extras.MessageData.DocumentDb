@@ -60,6 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DocumentClientReference.cs" />
     <Compile Include="DocumentDbRepository.cs" />
     <Compile Include="DocumentMapper.cs" />
     <Compile Include="MessageWrapper.cs" />

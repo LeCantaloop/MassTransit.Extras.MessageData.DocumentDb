@@ -25,7 +25,7 @@ PM> Install-Package MassTransit.Extras.MessageData.DocumentDb
 Now that we have the package, we next create a `DocumentClient` that talks to the DocumentDB database
 
 ```csharp
-Func<DocumentClient> client = () => new DocumentClient(new Uri("https://mydb.documents.azure.com:443/"), "secret-key");
+var client = new DocumentClient(new Uri("https://mydb.documents.azure.com:443/"), "secret-key");
 var repo = new DocumentDbRepository(client, "database-name", "collection-name");
 ```
 
@@ -106,12 +106,22 @@ to keep it from filling up. To have DocumentDB auto-delete old messages you need
 
 1. Set the time to live value in the `Put` call, as we did in the example
 2. Enable time to live tracking for your DocumentDB collection. You can find more information on
-enabling that [here][documentdb-ttl]
+enabling that [here][docdb-ttl]
 
 Of course this also means if your consumers aren't consuming messages fast enough they may get
 an exception when trying to retrieve `MessageData` payloads.
 
-[mt]: http://masstransit-project.com/
+## DocumentClient best practices
+
+If your app will be sending a high rate of messages it's important to use the `DocumentClient`
+object correctly. First, make sure you're following the DocumentDB [performance best practices][docdb-perf],
+namely using direct mode and sharing your client across your AppDomain. `DocumentClient`
+implements `IDisposable`, so to facilitate sharing the `DocumentDbRepository` supports a
+`DocumentClientReference` wrapper. This class has a property `IsOwned`, the default is `true`
+but you can set it to `false` if you would like to manage the lifetime of the `DocumentClient`
+yourself.
+
 [docdb]: https://azure.microsoft.com/en-us/services/documentdb/
 [claim-check]: http://www.enterpriseintegrationpatterns.com/patterns/messaging/StoreInLibrary.html        
-[documentdb-ttl]: https://azure.microsoft.com/en-us/documentation/articles/documentdb-time-to-live/
+[docdb-ttl]: https://azure.microsoft.com/en-us/documentation/articles/documentdb-time-to-live/
+[docdb-perf]: https://azure.microsoft.com/en-us/blog/performance-tips-for-azure-documentdb-part-1-2/
