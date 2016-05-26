@@ -9,3 +9,5 @@ deploy:
 - provider: NuGet
   api_key:
     secure: KztQKStikpPv2BcLUeyQczT+vis86eh0H/PPqnhJ+umDIvjJZzjmNzTj/E3ZFo7q
+  on:
+    branch: master
