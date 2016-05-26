@@ -117,8 +117,8 @@ If your app will be sending a high rate of messages it's important to use the `D
 object correctly. First, make sure you're following the DocumentDB [performance best practices][docdb-perf],
 namely using direct mode and sharing your client across your AppDomain. `DocumentClient`
 implements `IDisposable`, so to facilitate sharing the `DocumentDbRepository` supports a
-`DocumentClientReference` wrapper. This class has a property `IsOwned`, the default is `true`
-but you can set it to `false` if you would like to manage the lifetime of the `DocumentClient`
+`DocumentClientReference` wrapper. This class has a property `IsOwned`, with a default value of `true`;
+set it to `false` if you would like to manage the lifetime of the `DocumentClient`
 yourself.
 
 [mt]: http://masstransit-project.com/
