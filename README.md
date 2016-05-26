@@ -121,6 +121,7 @@ implements `IDisposable`, so to facilitate sharing the `DocumentDbRepository` su
 but you can set it to `false` if you would like to manage the lifetime of the `DocumentClient`
 yourself.
 
+[mt]: http://masstransit-project.com/
 [docdb]: https://azure.microsoft.com/en-us/services/documentdb/
 [claim-check]: http://www.enterpriseintegrationpatterns.com/patterns/messaging/StoreInLibrary.html        
 [docdb-ttl]: https://azure.microsoft.com/en-us/documentation/articles/documentdb-time-to-live/
