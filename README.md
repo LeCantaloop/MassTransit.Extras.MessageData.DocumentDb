@@ -2,6 +2,9 @@
 
 A library for [MassTransit][mt] to use [Azure DocumentDB][docdb] to store large message payloads.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/5r0447j1ysbd531e?svg=true)](https://ci.appveyor.com/project/MattKotsenas/masstransit-extras-messagedata-documentdb)
+[![NuGet Status](http://nugetstatus.com/MassTransit.Extras.MessageData.DocumentDb.png)](http://nugetstatus.com/packages/MassTransit.Extras.MessageData.DocumentDb)
+
 ## Why?
 
 Sometimes your services need to send large payloads. Putting the big payload in the message either
