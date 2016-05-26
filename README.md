@@ -121,7 +121,36 @@ implements `IDisposable`, so to facilitate sharing the `DocumentDbRepository` su
 set it to `false` if you would like to manage the lifetime of the `DocumentClient`
 yourself.
 
+Here's an example using [Autofac][autofac]. In this sample Autofac creates a singleton `DocumentClient`
+and is a responsible for cleaning up all objects when the lifetime goes out-of-scope.
+
+```csharp
+var builder = new ContainerBuilder();
+builder.Register(ctx =>
+{
+    return new DocumentClient(new Uri("https://mydb.documents.azure.com:443/"), "secret-key");
+}).AsSelf().SingleInstance();
+
+builder.Register(ctx =>
+{
+    var client = ctx.Resolve<DocumentClient>();
+    var reference = new DocumentDbReference
+    {
+        Client = client,
+        IsOwned = false
+    };
+    return new DocumentDbRepository(reference, "database-name", "collection-name");
+}).AsRegisteredInterfaces();
+
+using (var lifetimeScope = builder.Build())
+{
+    var repo = lifetimeScope.Resolve<IMessageDataRepository>();
+    // Do stuff with repo
+}
+```
+
 [mt]: http://masstransit-project.com/
+[autofac]: http://autofac.org/
 [docdb]: https://azure.microsoft.com/en-us/services/documentdb/
 [claim-check]: http://www.enterpriseintegrationpatterns.com/patterns/messaging/StoreInLibrary.html        
 [docdb-ttl]: https://azure.microsoft.com/en-us/documentation/articles/documentdb-time-to-live/
