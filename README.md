@@ -3,7 +3,7 @@
 A library for [MassTransit][mt] to use [Azure DocumentDB][docdb] to store large message payloads.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/5r0447j1ysbd531e?svg=true)](https://ci.appveyor.com/project/MattKotsenas/masstransit-extras-messagedata-documentdb)
-[![NuGet Status](http://nugetstatus.com/MassTransit.Extras.MessageData.DocumentDb.png)](http://nugetstatus.com/packages/MassTransit.Extras.MessageData.DocumentDb)
+[![Install from nuget](http://img.shields.io/nuget/v/MassTransit.Extras.MessageData.DocumentDb.svg?style=flat-square)](https://www.nuget.org/packages/MassTransit.Extras.MessageData.DocumentDb)
 
 ## Why?
 
