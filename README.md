@@ -137,7 +137,7 @@ builder.Register(ctx =>
 builder.Register(ctx =>
 {
     var client = ctx.Resolve<DocumentClient>();
-    var reference = new DocumentDbReference
+    var reference = new DocumentClientReference
     {
         Client = client,
         IsOwned = false
